@@ -20,9 +20,12 @@ class Player:
     def move(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            self.offset -= self.vel
+            if self.offset < 800:
+                self.offset -= self.vel
+                print(self.offset)
         elif keys[pygame.K_UP] or keys[pygame.K_w]:
-            self.offset += self.vel
+            if self.offset > 0:
+                self.offset += self.vel
 
 
 
@@ -35,17 +38,22 @@ class layer:
         self.thickness = (thickness*1)
         self.color = color
         self.y = pos
+        self.offset = 0
 
     def draw(self, screen, offset):
-        pygame.draw.rect(screen, self.color, (0, self.y+offset, WIDTH, self.thickness+offset))
+        self.offset = offset
+        pygame.draw.rect(screen, self.color, (0, self.y+self.offset, 600, 10000))
 
 def main():
     layers.append(layer(100, (255, 0, 0)))
-    layers.append(layer(5000, (100, 0, 0), 0))
-    layers.append(layer(2000, (0, 0, 255), 0))
-    layers.append(layer(500, (0, 0, 100), 0))
+    layers.append(layer(500, (100, 0, 0), 100))
+    layers.append(layer(200, (0, 0, 255), 600))
+    layers.append(layer(150, (0, 0, 100), 800))
 
     l_thick = 0
+    x = 0
+
+    w = False
 
     for i in range(len(layers)):
         if i > 0:
@@ -68,10 +76,26 @@ def main():
         win.fill((180, 180, 250))
 
         for l in layers:
-            offset = player.offset
-            l.draw(win, offset)
+            l.draw(win, player.offset)
+
+        if player.offset < -300:
+            player.offset = 0
+            pygame.font.init()
+            font = pygame.font.SysFont("comicsans", 100)
+            w = True
+
 
         player.draw(win)
+
+        if w:
+            print("You Win!")
+            text = font.render("You Win!", True, (255,255,255))
+            target_x = HEIGHT // 2 - text.get_height() // 2
+
+            if x < target_x:
+                x += 1
+
+            win.blit(text, (WIDTH//2 - text.get_width()//2, x))
 
         pygame.display.update()
 
